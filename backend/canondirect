@@ -1,0 +1,87 @@
+#!/bin/sh
+# canondirect - CUPS backend that sends each job to an IPP printer in ONE piece.
+#
+# Why: some Canon PIXMA / MegaTank printers (G3110, G3010, G2110, G4110...) stall
+# or cancel jobs when CUPS's stock "ipp" backend streams them with HTTP chunked
+# transfer encoding. This backend buffers the whole job first and then sends it
+# with Create-Job + Send-Document using a Content-Length (ipptool -L).
+#
+# Device URI:  canondirect://PRINTER_IP/ipp/print
+# Install:     /usr/lib/cups/backend/canondirect  (root:root, mode 0755)
+#
+# License: MIT
+
+# Discovery mode (lpinfo -v)
+if [ $# -eq 0 ]; then
+  echo 'network canondirect "Unknown" "IPP printer, whole-job send (canondirect)"'
+  exit 0
+fi
+
+if [ $# -lt 5 ]; then
+  echo "Usage: canondirect job-id user title copies options [file]" >&2
+  exit 1
+fi
+
+# CUPS backend exit codes
+CUPS_BACKEND_OK=0
+CUPS_BACKEND_RETRY=6
+
+URI="ipp://${DEVICE_URI#canondirect://}"
+FORMAT="${CANONDIRECT_FORMAT:-image/pwg-raster}"   # what the queue's PPD outputs
+RETRIES="${CANONDIRECT_RETRIES:-30}"                 # x 10 s while the printer is busy
+
+TMP=$(mktemp -d "${TMPDIR:-/tmp}/canondirect.XXXXXX") || exit $CUPS_BACKEND_RETRY
+trap 'rm -rf "$TMP"' EXIT
+
+# 1. Buffer the whole job (file argument or stdin from the filter chain)
+if [ -n "$6" ]; then
+  cp "$6" "$TMP/doc" || exit $CUPS_BACKEND_RETRY
+else
+  cat > "$TMP/doc" || exit $CUPS_BACKEND_RETRY
+fi
+if [ ! -s "$TMP/doc" ]; then
+  echo "INFO: empty document, nothing to print" >&2
+  exit $CUPS_BACKEND_OK
+fi
+
+# 2. IPP request: Create-Job + Send-Document (last-document=true)
+cat > "$TMP/job.test" <<EOF
+{ NAME "Create-Job"
+  OPERATION Create-Job
+  GROUP operation-attributes-tag
+  ATTR charset attributes-charset utf-8
+  ATTR naturalLanguage attributes-natural-language en
+  ATTR uri printer-uri \$uri
+  ATTR name requesting-user-name cups
+  ATTR name job-name "cups-$1"
+  STATUS successful-ok
+  EXPECT job-id OF-TYPE integer }
+{ NAME "Send-Document"
+  OPERATION Send-Document
+  GROUP operation-attributes-tag
+  ATTR charset attributes-charset utf-8
+  ATTR naturalLanguage attributes-natural-language en
+  ATTR uri printer-uri \$uri
+  ATTR integer job-id \$job-id
+  ATTR name requesting-user-name cups
+  ATTR mimeMediaType document-format $FORMAT
+  ATTR boolean last-document true
+  FILE \$filename
+  STATUS successful-ok }
+EOF
+
+# 3. Send, retrying while the printer is busy
+i=0
+while [ "$i" -lt "$RETRIES" ]; do
+  if ipptool -L -T 120 -f "$TMP/doc" "$URI" "$TMP/job.test" > "$TMP/out" 2>&1; then
+    echo "INFO: job sent to printer" >&2
+    exit $CUPS_BACKEND_OK
+  fi
+  echo "INFO: printer busy, retrying in 10 s..." >&2
+  i=$((i + 1))
+  sleep 10
+done
+
+echo "ERROR: could not send job to $URI" >&2
+sed 's/^/DEBUG: /' "$TMP/out" >&2
+exit $CUPS_BACKEND_RETRY
