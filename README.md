@@ -72,7 +72,39 @@ See [docs/troubleshooting.md](docs/troubleshooting.md) for the commands used to 
 
 Got it working on another model? Please open an issue or PR to add it to this list.
 
+## Print from a Windows PC to a Canon G3010 / G3110 over Wi‑Fi
+
+Windows doesn't use AirPrint. Don't go through the Linux server: the fastest way with all the options is to print **directly to the Canon over Wi‑Fi with Canon's own driver**.
+
+**Option A: direct to the printer (recommended)**
+
+1. Install the Canon driver for your model: the **"G3010 series" MP Drivers** from Canon's support site. If the printer was ever connected by USB, the driver is probably already installed.
+2. Open **PowerShell as administrator** and create a Standard TCP/IP port (RAW, port 9100) plus the printer. `192.168.1.50` is an example; use your printer's IP.
+
+   ```powershell
+   Add-PrinterPort -Name "IP_192.168.1.50" -PrinterHostAddress "192.168.1.50" -PortNumber 9100
+   Add-Printer -Name "Canon G3110 (WiFi)" -DriverName "Canon G3010 series" -PortName "IP_192.168.1.50"
+   ```
+
+   The `-DriverName` must match the installed driver name exactly. Check it with `Get-PrinterDriver`.
+3. Print a test page from **Settings → Bluetooth & devices → Printers & scanners**.
+
+**Option B: through the CUPS server (no Canon driver)**
+
+**Settings → Printers & scanners → Add device → "The printer that I want isn't listed" → Select a shared printer by name**, and enter:
+
+```
+http://192.168.1.10:631/printers/Canon_AirPrint
+```
+
+Here `192.168.1.10` is your Linux server (example IP) and `Canon_AirPrint` is your `--queue`. Choose the **Microsoft IPP Class Driver**. It works, but with fewer options, and the server has to be on.
+
+> Reserve the printer's IP by MAC in your router's DHCP settings, or the Windows port breaks when the IP changes.
+
 ## FAQ
+
+### How do I print from Windows to a Canon G3010 over Wi‑Fi?
+Use Option A above: Canon's "G3010 series" driver plus a Standard TCP/IP port (RAW 9100) pointing at the printer's IP. No USB cable needed.
 
 ### How do I print from my iPhone to a Canon G3010?
 The Canon PIXMA G3010 is not AirPrint, so it does not show up on iPhone by itself. Install this project on any Linux box on the same Wi‑Fi network, such as a Raspberry Pi or an old laptop. The G3010 then appears in **Share → Print** on iPhone and iPad.
@@ -125,7 +157,39 @@ sudo ./install.sh 192.168.1.50 --name "Canon G3110" --iface eth0 --mask-colord
 - La Canon solo usa **2.4 GHz**. Si tenés malla (mesh) y la impresora se pega a un nodo lejano con señal débil, reiniciá ese nodo desde el router.
 - Si imprime todo en blanco o muy tenue, el problema es la tinta o el cabezal, no el servidor. Hacé una limpieza de cabezal.
 
+### Imprimir desde una PC con Windows en la Canon G3010 / G3110 por Wi‑Fi
+
+Windows no usa AirPrint. No pases por el servidor Linux: lo más rápido y con todas las opciones es imprimir **directo a la Canon por Wi‑Fi con el driver oficial de Canon**.
+
+**Opción A: directo a la impresora (recomendada)**
+
+1. Instalá el driver de Canon de tu modelo: los **"MP Drivers" de la serie G3010**, en el sitio de soporte de Canon. Si alguna vez la conectaste por USB, probablemente ya lo tenés.
+2. Abrí **PowerShell como administrador** y creá un puerto TCP/IP estándar (RAW, puerto 9100) y la impresora. `192.168.1.50` es un ejemplo; poné la IP de tu impresora.
+
+   ```powershell
+   Add-PrinterPort -Name "IP_192.168.1.50" -PrinterHostAddress "192.168.1.50" -PortNumber 9100
+   Add-Printer -Name "Canon G3110 (WiFi)" -DriverName "Canon G3010 series" -PortName "IP_192.168.1.50"
+   ```
+
+   El `-DriverName` tiene que coincidir exacto con el driver instalado. Revisalo con `Get-PrinterDriver`.
+3. Imprimí una página de prueba desde **Configuración → Bluetooth y dispositivos → Impresoras y escáneres**.
+
+**Opción B: por el servidor CUPS (sin driver de Canon)**
+
+Entrá a **Configuración → Impresoras y escáneres → Agregar dispositivo → "La impresora que quiero no está en la lista" → Seleccionar una impresora compartida por nombre** y poné:
+
+```
+http://192.168.1.10:631/printers/Canon_AirPrint
+```
+
+En esa dirección, `192.168.1.10` es tu servidor Linux (IP de ejemplo) y `Canon_AirPrint` es tu `--queue`. Elegí **Microsoft IPP Class Driver**. Funciona, pero con menos opciones, y el servidor tiene que estar encendido.
+
+> Reservá la IP de la impresora por MAC en el router. Si cambia, el puerto de Windows deja de funcionar.
+
 ### Preguntas frecuentes
+
+#### ¿Cómo imprimir desde la PC en una Canon G3010 por Wi‑Fi?
+Usá la Opción A de arriba: el driver "G3010 series" de Canon con un puerto TCP/IP estándar (RAW 9100) que apunte a la IP de la impresora. No necesitás cable USB.
 
 #### ¿Cómo imprimir desde el iPhone en una Canon G3010?
 La Canon PIXMA G3010 no es compatible con AirPrint, por eso no aparece en el iPhone. Instalá este proyecto en cualquier equipo Linux de tu red, como una Raspberry Pi o una laptop vieja. Después la G3010 aparece en **Compartir → Imprimir** en el iPhone y el iPad.
@@ -151,6 +215,6 @@ Sí. Sirve cualquier sistema basado en Debian con CUPS: Raspberry Pi OS, Ubuntu 
 
 MIT. Contributions welcome.
 
-**Keywords:** how to print from iPhone to Canon G3010, print from iPhone to Canon G3110, Canon G3010 AirPrint, Canon G3110 AirPrint, Canon G3010 iPhone, Canon G2010 G4010 iPhone, Canon PIXMA G series iPad printing, Canon MegaTank AirPrint, Canon printer not showing on iPhone, add AirPrint to any printer, AirPrint Linux, AirPrint CUPS, AirPrint Raspberry Pi, CUPS iOS printing stuck, iPhone says printing but nothing prints CUPS, Avahi AirPrint service, driverless IPP Canon.
+**Keywords:** how to print from iPhone to Canon G3010, print from iPhone to Canon G3110, Canon G3010 AirPrint, Canon G3110 AirPrint, Canon G3010 iPhone, Canon G2010 G4010 iPhone, Canon PIXMA G series iPad printing, Canon MegaTank AirPrint, Canon printer not showing on iPhone, add AirPrint to any printer, AirPrint Linux, AirPrint CUPS, AirPrint Raspberry Pi, CUPS iOS printing stuck, iPhone says printing but nothing prints CUPS, Avahi AirPrint service, driverless IPP Canon, print from Windows to Canon G3010 over WiFi, Canon G3110 Windows 11 WiFi setup.
 
-**Palabras clave:** cómo imprimir desde iPhone en Canon G3010, imprimir desde iPhone Canon G3110, Canon G3010 AirPrint, Canon G3110 no aparece en iPhone, imprimir desde iPad en Canon PIXMA, Canon G3010 compatible con iPhone, convertir impresora en AirPrint, AirPrint con Raspberry Pi, AirPrint Debian Ubuntu, impresora Canon iPhone sin app.
+**Palabras clave:** cómo imprimir desde iPhone en Canon G3010, imprimir desde PC a Canon G3010 por WiFi, Canon G3110 Windows 11 por WiFi, imprimir desde iPhone Canon G3110, Canon G3010 AirPrint, Canon G3110 no aparece en iPhone, imprimir desde iPad en Canon PIXMA, Canon G3010 compatible con iPhone, convertir impresora en AirPrint, AirPrint con Raspberry Pi, AirPrint Debian Ubuntu, impresora Canon iPhone sin app.
