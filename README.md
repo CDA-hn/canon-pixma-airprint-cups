@@ -1,4 +1,4 @@
-# AirPrint for Canon PIXMA / MegaTank printers with CUPS on Linux
+# How to print from iPhone to a Canon G3010 / G3110 (AirPrint for Canon PIXMA with CUPS on Linux)
 
 **Print from iPhone and iPad to a Canon PIXMA G3110 / G3010 (and other non‑AirPrint Wi‑Fi printers) using a Debian, Ubuntu or Raspberry Pi server.** No USB cable and no PC left on. Your printer shows up in the iOS Print menu like any AirPrint printer.
 
@@ -72,11 +72,31 @@ See [docs/troubleshooting.md](docs/troubleshooting.md) for the commands used to 
 
 Got it working on another model? Please open an issue or PR to add it to this list.
 
+## FAQ
+
+### How do I print from my iPhone to a Canon G3010?
+The Canon PIXMA G3010 is not AirPrint, so it does not show up on iPhone by itself. Install this project on any Linux box on the same Wi‑Fi network, such as a Raspberry Pi or an old laptop. The G3010 then appears in **Share → Print** on iPhone and iPad.
+
+### Why doesn't my Canon G3110 show up on my iPhone?
+The G3110 / G3010 / G2010 / G4010 series only speak Mopria and Canon's own protocols, not AirPrint. iOS only lists printers that announce AirPrint over Bonjour (mDNS). This repo makes a Linux server announce it for them.
+
+### Can I print from an iPad to a Canon PIXMA G series without the Canon PRINT app?
+Yes. Once installed, any iPhone or iPad on your network uses the built‑in iOS Print menu. No app is needed.
+
+### My iPhone says "Printing…" forever with CUPS, or says it printed but the Canon prints nothing
+Those are the two bugs this repo fixes: iOS stalling on TLS (IPPS), and the Canon not processing chunked IPP jobs. See the table above.
+
+### Which Canon printers should this work with?
+It is tested on the **PIXMA G3110** (which identifies as *G3010 series*). It should also work with other Wi‑Fi Canon ink‑tank / MegaTank models that accept IPP and PWG raster, such as the G3010, G3110, G3160, G3170, G3200, G3260, G4010, G4110, G4210, G4270, G2110 network models, and many PIXMA TS / TR models. Please report results in an issue.
+
+### Does it work on a Raspberry Pi?
+Yes. Any Debian‑based system with CUPS works: Raspberry Pi OS, Ubuntu Server, Debian, or a home server or NAS running Debian.
+
 ---
 
 ## Español
 
-# AirPrint para impresoras Canon PIXMA / MegaTank con CUPS en Linux
+# Cómo imprimir desde iPhone en una Canon G3010 / G3110 (AirPrint para Canon PIXMA con CUPS en Linux)
 
 **Imprimí desde iPhone y iPad en una Canon PIXMA G3110 / G3010 (u otra impresora Wi‑Fi sin AirPrint) usando un servidor Debian, Ubuntu o Raspberry Pi.** Sin cable USB y sin dejar una PC encendida. La impresora aparece en el menú Imprimir del iPhone como cualquier impresora AirPrint.
 
@@ -105,10 +125,32 @@ sudo ./install.sh 192.168.1.50 --name "Canon G3110" --iface eth0 --mask-colord
 - La Canon solo usa **2.4 GHz**. Si tenés malla (mesh) y la impresora se pega a un nodo lejano con señal débil, reiniciá ese nodo desde el router.
 - Si imprime todo en blanco o muy tenue, el problema es la tinta o el cabezal, no el servidor. Hacé una limpieza de cabezal.
 
+### Preguntas frecuentes
+
+#### ¿Cómo imprimir desde el iPhone en una Canon G3010?
+La Canon PIXMA G3010 no es compatible con AirPrint, por eso no aparece en el iPhone. Instalá este proyecto en cualquier equipo Linux de tu red, como una Raspberry Pi o una laptop vieja. Después la G3010 aparece en **Compartir → Imprimir** en el iPhone y el iPad.
+
+#### ¿Por qué mi Canon G3110 no aparece en el iPhone?
+Las series G3110, G3010, G2010 y G4010 usan Mopria y protocolos propios de Canon, no AirPrint. El iPhone solo muestra impresoras que se anuncian por AirPrint (Bonjour / mDNS). Este repo hace que un servidor Linux la anuncie por ella.
+
+#### ¿Puedo imprimir desde el iPad en una Canon sin la app Canon PRINT?
+Sí. Una vez instalado, cualquier iPhone o iPad de tu red usa el menú Imprimir normal de iOS, sin instalar ninguna app.
+
+#### El iPhone se queda en "Imprimiendo…" o dice que imprimió pero la Canon no saca nada
+Son justo las dos fallas que arregla este repo: el cifrado TLS (IPPS) que traba a CUPS y el envío por partes que la Canon no procesa.
+
+#### ¿Con qué impresoras Canon funciona?
+Está probado en la **PIXMA G3110**, que se identifica como *G3010 series*. Debería funcionar con otras Canon de tanque de tinta / MegaTank con Wi‑Fi que acepten IPP: G3010, G3110, G3160, G3170, G4010, G4110, G4210 y muchas PIXMA TS / TR. Si la probás en otro modelo, contanos en un *issue*.
+
+#### ¿Funciona con Raspberry Pi?
+Sí. Sirve cualquier sistema basado en Debian con CUPS: Raspberry Pi OS, Ubuntu Server, Debian, o un servidor casero o NAS con Debian.
+
 ---
 
 ## License
 
 MIT. Contributions welcome.
 
-**Keywords:** AirPrint Linux, AirPrint CUPS, Canon G3110 iPhone, Canon G3010 AirPrint, Canon PIXMA AirPrint Raspberry Pi, MegaTank iPhone printing, CUPS iOS printing stuck, iPhone printer not printing CUPS, Avahi AirPrint service, driverless IPP Canon, imprimir desde iPhone Canon, AirPrint Debian Ubuntu.
+**Keywords:** how to print from iPhone to Canon G3010, print from iPhone to Canon G3110, Canon G3010 AirPrint, Canon G3110 AirPrint, Canon G3010 iPhone, Canon G2010 G4010 iPhone, Canon PIXMA G series iPad printing, Canon MegaTank AirPrint, Canon printer not showing on iPhone, add AirPrint to any printer, AirPrint Linux, AirPrint CUPS, AirPrint Raspberry Pi, CUPS iOS printing stuck, iPhone says printing but nothing prints CUPS, Avahi AirPrint service, driverless IPP Canon.
+
+**Palabras clave:** cómo imprimir desde iPhone en Canon G3010, imprimir desde iPhone Canon G3110, Canon G3010 AirPrint, Canon G3110 no aparece en iPhone, imprimir desde iPad en Canon PIXMA, Canon G3010 compatible con iPhone, convertir impresora en AirPrint, AirPrint con Raspberry Pi, AirPrint Debian Ubuntu, impresora Canon iPhone sin app.
